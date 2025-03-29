@@ -1,31 +1,23 @@
 package gdu.admin_service.dto.request.product;
 
 import gdu.admin_service.dto.model.ImagesDto;
-import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CreateProductRequest {
-    @NotBlank
     private String name;
-
-    @NotBlank
     private short quantity;
-
-    @NotBlank
     private String description;
-
-    @NotBlank
     private BigDecimal price;
-
-    @NotBlank
     private byte categoryId;
-
-    @NotBlank
     private List<ImagesDto> images;
 }

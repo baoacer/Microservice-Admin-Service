@@ -1,88 +1,176 @@
 package gdu.admin_service.controller;
 
+import gdu.admin_service.dto.model.CategoryDto;
+import gdu.admin_service.dto.model.ImagesDto;
 import gdu.admin_service.dto.model.ProductDto;
+import gdu.admin_service.dto.request.product.CreateProductData;
 import gdu.admin_service.dto.request.product.CreateProductRequest;
 import gdu.admin_service.dto.request.product.UpdateProductRequest;
-import gdu.admin_service.dto.response.PageResponse;
+import gdu.admin_service.dto.response.ObjectResponse;
 import gdu.admin_service.dto.response.UpdateProductResponse;
 import lombok.AllArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
 @Controller
-@RequestMapping("/admin/product")
+@RequestMapping("/admin")
 @AllArgsConstructor
 public class ProductController {
     private final RestTemplate restTemplate;
-    private final String url = "http://localhost:8081/api/v1/product";
+    private final String urlProduct = "http://localhost:8081/api/v1/product";
+    private final String urlCategory = "http://localhost:8081/api/v1/category";
 
-    @GetMapping
-    public ResponseEntity<PageResponse<ProductDto>> getAllProducts(
-            @RequestParam(defaultValue = "20") byte size,
-            @RequestParam(defaultValue = "0") byte page
-    ) {
-        String fullUrl = url + "?size=" + size + "&page=" + page;
-        ResponseEntity<PageResponse<ProductDto>> response = restTemplate.exchange(
-                fullUrl,
-                HttpMethod.GET,
-                null, // request headers, body...
-                new ParameterizedTypeReference<PageResponse<ProductDto>>() {}
-        );
-
-        return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
-    }
-
-    @PostMapping
-    public ResponseEntity<ProductDto> createProduct(
-            @RequestBody CreateProductRequest request,
+    @GetMapping("/product/new")
+    public String newProduct(
             Model model
     ) {
-        ProductDto response = restTemplate.exchange(
-                url,
-                HttpMethod.POST,
+        model.addAttribute("request", new CreateProductData());
+        ResponseEntity<List<CategoryDto>> categoryResponse = restTemplate.exchange(
+                urlCategory,
+                HttpMethod.GET,
                 null,
-                ProductDto.class,
-                request
-        ).getBody();
-        model.addAttribute("product", response);
+                new ParameterizedTypeReference<List<CategoryDto>>() {}
+        );
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        List<CategoryDto> categories = categoryResponse.getBody();
+        model.addAttribute("categories", categories);
+        return "admin/admin-new-product";
     }
 
-    @PutMapping
-    public ResponseEntity<UpdateProductResponse> updateProduct(
-            @RequestBody UpdateProductRequest request
+    @GetMapping("/product/home")
+    public String getAllProducts(
+            @RequestParam(defaultValue = "20") byte size,
+            @RequestParam(defaultValue = "0") byte page,
+            Model model
     ) {
+        String fullUrl = urlProduct + "?size=" + size + "&page=" + page;
+        ResponseEntity<ObjectResponse<ProductDto>> response = restTemplate.exchange(
+                fullUrl,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<ObjectResponse<ProductDto>>() {}
+        );
+
+        ObjectResponse<ProductDto> responseBody = response.getBody();
+
+        if (responseBody != null) {
+            List<ProductDto> products = responseBody.getContent();
+            model.addAttribute("products", products);
+        }
+        model.addAttribute("activePage", "products");
+
+        return "admin/admin-product";
+    }
+
+    @GetMapping("/product/edit/{id}")
+    public String showEditForm(
+            @PathVariable Short id,
+            Model model
+    ) {
+        String fullUrl = urlProduct + "/" + id;
+
+        ResponseEntity<ProductDto> response = restTemplate.exchange(
+                fullUrl,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<ProductDto>() {}
+        );
+
+        ResponseEntity<List<CategoryDto>> categoryResponse = restTemplate.exchange(
+                urlCategory,
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<List<CategoryDto>>() {}
+        );
+
+        List<CategoryDto> categories = categoryResponse.getBody();
+        model.addAttribute("categories", categories);
+
+        ProductDto product = response.getBody();
+        model.addAttribute("product", product);
+
+        return "admin/edit-product";
+    }
+
+    @PostMapping("/product/update")
+    public String updateProduct(
+            @ModelAttribute ProductDto productDto,
+            @RequestParam(name = "newImage", required = false) String newImage
+    ) {
+        productDto.setImages(null);
+
+        if (newImage != null && !newImage.isEmpty()) {
+            List<ImagesDto> images = new ArrayList<>();
+            images.add(new ImagesDto(newImage));
+            productDto.setImages(images);
+        }
+
+        UpdateProductRequest request = UpdateProductRequest.builder()
+                .productId(productDto.getId())
+                .name(productDto.getName())
+                .description(productDto.getDescription())
+                .images(productDto.getImages())
+                .price(productDto.getPrice())
+                .quantity(productDto.getInventory().getStock())
+                .category(productDto.getCategory())
+                .build();
 
         HttpEntity<UpdateProductRequest> requestEntity = new HttpEntity<>(request);
 
-        ResponseEntity<UpdateProductResponse> response = restTemplate.exchange(
-                url,
+        restTemplate.exchange(
+                urlProduct,
                 HttpMethod.PUT,
                 requestEntity,
                 UpdateProductResponse.class
         );
 
-        return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
+        return "redirect:/admin/product/home";
     }
 
-    @DeleteMapping
-    public ResponseEntity<Void> getAllProducts(
-            @RequestParam short id
+    @PostMapping("/product/create")
+    public String createProduct(
+            @ModelAttribute CreateProductData data,
+            Model model
     ) {
-        String fullUrl = url + "?id=" + id;
+        CreateProductRequest request = CreateProductRequest.builder()
+                .name(data.getName())
+                .description(data.getDescription())
+                .price(data.getPrice())
+                .categoryId(data.getCategoryId())
+                .quantity(data.getQuantity())
+                .build();
+
+        List<ImagesDto> images = new ArrayList<>();
+        images.add(new ImagesDto(data.getImageSrc()));
+        request.setImages(images);
+
+        HttpEntity<CreateProductRequest> requestEntity = new HttpEntity<>(request);
+        ResponseEntity<ProductDto> response = restTemplate.exchange(
+                urlProduct,
+                HttpMethod.POST,
+                requestEntity,
+                ProductDto.class
+        );
+        model.addAttribute("product", response);
+
+        return "redirect:/admin/product/home";
+    }
+
+    @PostMapping("/product/delete/{id}")
+    public String deleteProduct(
+            @PathVariable short id
+    ) {
+        String fullUrl = urlProduct + "?id=" + id;
         ResponseEntity<Void> response = restTemplate.exchange(
                 fullUrl,
                 HttpMethod.DELETE,
@@ -90,7 +178,6 @@ public class ProductController {
                 Void.class,
                 id
         );
-
-        return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
+        return "redirect:/admin/product/home";
     }
 }

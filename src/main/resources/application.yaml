@@ -2,6 +2,9 @@ server:
   port: 8083
 
 spring:
+  output:
+    ansi:
+      enabled: always
   application:
     name: admin-service
 
