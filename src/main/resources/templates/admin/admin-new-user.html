@@ -19,7 +19,7 @@
           <select class="status" th:field="*{roleName}" required>
             <option value="">-- Select Role --</option>
             <option th:each="role : ${roles}"
-                    th:value="${role.id}"
+                    th:value="${role.name}"
                     th:text="${role.name}">
             </option>
           </select>
@@ -27,22 +27,15 @@
 
         <label class="label">Email:</label>
         <label>
-          <input class="input" th:field="*{email}" type="email">
-          <span style="color: red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+          <input class="input" th:field="*{email}" type="email" required>
         </label>
 
         <label class="label">Password:</label>
         <label>
-          <input class="input" th:field="*{password}" type="password">
+          <input class="input" th:field="*{password}" type="password" required>
         </label>
 
-<!--        <label class="label">Confirm Password:</label>-->
-<!--        <label>-->
-<!--          <input class="input" th:field="*{confirmPassword}" type="password">-->
-<!--        </label>-->
-
         <button class="btn add-btn" type="submit">Create User</button>
-
         <a class="btn" th:href="@{/admin/user/home}">
           <button class="btn remote-btn" type="button">Cancel</button>
         </a>

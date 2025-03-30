@@ -17,11 +17,4 @@ public class CreateUserRequest {
 
     @NotBlank(message = "Role is required")
     private String roleName;
-
-    @NotBlank(message = "Confirm Password cannot be empty")
-    private String confirmPassword;
-
-    public boolean isPasswordsMatching() {
-        return password != null && password.equals(confirmPassword);
-    }
 }

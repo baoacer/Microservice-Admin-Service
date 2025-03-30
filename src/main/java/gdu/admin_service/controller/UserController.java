@@ -83,6 +83,7 @@ public class UserController {
             @Valid @ModelAttribute("request") CreateUserRequest request,
             Model model
     ) {
+
         HttpEntity<CreateUserRequest> requestEntity = new HttpEntity<>(request);
         restTemplate.exchange(
                 urlUser,
@@ -92,21 +93,7 @@ public class UserController {
         );
         return "redirect:/admin/user/home";
     }
-//
-//    @PutMapping
-//    public ResponseEntity<UserDto> updateUser(
-//            @RequestBody UpdateUserRequest request
-//    ) {
-//        HttpEntity<UpdateUserRequest> requestEntity = new HttpEntity<>(request);
-//        ResponseEntity<UserDto> response = restTemplate.exchange(
-//                urlUser,
-//                HttpMethod.PUT,
-//                requestEntity,
-//                UserDto.class
-//        );
-//        return ResponseEntity.status(HttpStatus.OK).body(response.getBody());
-//    }
-//
+
     @PostMapping("/user/delete/{id}")
     public String deleteUser(
             @PathVariable Short id

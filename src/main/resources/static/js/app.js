@@ -76,6 +76,14 @@ document.addEventListener("DOMContentLoaded", function () {
     initDropdownHandlers();
 });
 
+document.addEventListener("input", function(event) {
+    if (event.target.type === "number") {
+        if (event.target.value < 0) {
+            event.target.value = 0;
+        }
+    }
+});
+
 
 function updateNewImageSrc() {
     const input = document.getElementById("new-image-url");
