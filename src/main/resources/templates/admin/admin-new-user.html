@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main_layout.html}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Product</title>
+</head>
+
+<body>
+  <main>
+    <div class="container" layout:fragment="main-content">
+      <h2>Add New User</h2>
+      <form th:action="@{/admin/user/create}" th:object="${request}" method="post">
+        <label class="label">Role:</label>
+        <label>
+          <select class="status" th:field="*{roleName}" required>
+            <option value="">-- Select Role --</option>
+            <option th:each="role : ${roles}"
+                    th:value="${role.id}"
+                    th:text="${role.name}">
+            </option>
+          </select>
+        </label>
+
+        <label class="label">Email:</label>
+        <label>
+          <input class="input" th:field="*{email}" type="email">
+          <span style="color: red" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+        </label>
+
+        <label class="label">Password:</label>
+        <label>
+          <input class="input" th:field="*{password}" type="password">
+        </label>
+
+<!--        <label class="label">Confirm Password:</label>-->
+<!--        <label>-->
+<!--          <input class="input" th:field="*{confirmPassword}" type="password">-->
+<!--        </label>-->
+
+        <button class="btn add-btn" type="submit">Create User</button>
+
+        <a class="btn" th:href="@{/admin/user/home}">
+          <button class="btn remote-btn" type="button">Cancel</button>
+        </a>
+      </form>
+    </div>
+  </main>
+</body>
+
+</html>

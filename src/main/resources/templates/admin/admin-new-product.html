@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main_layout.html}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>New Product</title>
+</head>
+
+<body>
+  <main>
+    <div class="container" layout:fragment="main-content">
+      <h2>New Product</h2>
+      <form th:action="@{/admin/product/create}" th:object="${request}" method="post">
+        <label class="label">Category:</label>
+        <label>
+          <select class="status" th:field="*{categoryId}" required>
+            <option value="">-- Select Category --</option>
+            <option th:each="category : ${categories}"
+                    th:value="${category.id}"
+                    th:text="${category.name}">
+            </option>
+          </select>
+        </label>
+
+        <label class="label">Name:</label>
+        <label>
+          <input class="input" th:field="*{name}" type="text" required>
+        </label>
+
+        <label class="label">Description:</label>
+        <label>
+          <textarea class="input" th:field="*{description}" required></textarea>
+        </label>
+
+        <label class="label">Price:</label>
+        <label>
+          <input class="input" th:field="*{price}" type="number" step="0.01" required>
+        </label>
+
+        <label class="label">Quantity:</label>
+        <label>
+          <input class="input" th:field="*{quantity}" type="number" required>
+        </label>
+
+        <label class="label">Thêm ảnh:</label>
+        <label>
+          <input type="text" th:field="${request.imageSrc}">
+        </label>
+
+        <button class="btn update-btn" type="submit">CREATE</button>
+        <a class="btn" th:href="@{/admin/product/home}">
+          <button class="btn remote-btn" type="button">Cancel</button>
+        </a>
+      </form>
+    </div>
+  </main>
+</body>
+
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/main_layout.html}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User</title>
+</head>
+
+<body>
+  <main>
+    <div class="container" layout:fragment="main-content">
+      <div class="search-container">
+        <label>
+          <input type="text" id="searchInput" class="searchInput" onkeyup="searchTable()" placeholder="Search...">
+        </label>
+      </div>
+
+      <table class="table-orders">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Total Price</th>
+          <th>Order Time</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="order : ${orders}">
+          <td th:text="${order.orderId}"></td>
+          <td th:text="${order.totalPrice}"></td>
+          <td th:text="${#temporals.format(order.orderTime, 'HH:mm dd/MM/yyyy')}"></td>
+          <td th:text="${order.status}"></td>
+          <td>
+            <div class="dropdown">
+              <button class="btn dropdown-toggle status-btn" type="button"
+                      th:classappend="
+                                    ${order.getStatus() == 'PENDING'} ? 'pending' :
+                                    (${order.getStatus() == 'CANCELLED'} ? 'cancelled' :
+                                    (${order.getStatus() == 'DELIVERED'} ? 'delivered' : ''))">
+                <span class="current-status" th:text="${order.getStatus()}"></span>
+              </button>
+              <ul class="dropdown-menu">
+                <li>
+                  <form th:action="@{/admin/order/status/{orderId}/PENDING(orderId=${order.orderId})}" method="post">
+                    <input type="hidden" name="status" value="PENDING" />
+                    <button class="dropdown-item pending" type="submit">PENDING</button>
+                  </form>
+                </li>
+                <li>
+                  <form th:action="@{/admin/order/status/{orderId}/CANCELLED(orderId=${order.orderId})}" method="post">
+                    <input type="hidden" name="status" value="CANCELLED" />
+                    <button class="dropdown-item cancelled" type="submit">CANCELLED</button>
+                  </form>
+                </li>
+                <li>
+                  <form th:action="@{/admin/order/status/{orderId}/DELIVERED(orderId=${order.orderId})}" method="post">
+                    <input type="hidden" name="status" value="DELIVERED" />
+                    <button class="dropdown-item delivered" type="submit">DELIVERED</button>
+                  </form>
+                </li>
+              </ul>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+      <div class="pagination">
+        <a th:if="${currentPage > 0}" th:href="@{/admin/order/home(page=${currentPage - 1}, size=${size})}">Previous</a>
+
+        <span th:text="'Page ' + (${currentPage + 1}) + ' of ' + ${totalPages}"></span>
+
+        <a th:if="${currentPage + 1 < totalPages}" th:href="@{/admin/order/home(page=${currentPage + 1}, size=${size})}">Next</a>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>
