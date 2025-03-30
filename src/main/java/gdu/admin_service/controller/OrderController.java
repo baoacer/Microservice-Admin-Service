@@ -3,6 +3,7 @@ package gdu.admin_service.controller;
 
 import gdu.admin_service.dto.model.*;
 import gdu.admin_service.dto.request.order.GetAllOrderOutputDTO;
+import gdu.admin_service.dto.request.order.UpdateStatusOrderRequest;
 import gdu.admin_service.dto.request.product.CreateProductData;
 import gdu.admin_service.dto.request.product.CreateProductRequest;
 import gdu.admin_service.dto.request.product.UpdateProductRequest;
@@ -38,7 +39,7 @@ public class OrderController {
 
     @GetMapping("/order/home")
     public String getAllUsers(
-            @RequestParam(defaultValue = "20") byte size,
+            @RequestParam(defaultValue = "5") byte size,
             @RequestParam(defaultValue = "0") byte page,
             Model model
     ) {
@@ -69,26 +70,35 @@ public class OrderController {
                         .totalPrice(order.getTotalAmount())
                         .build()).toList();
 
-        model.addAttribute("activePage", "orders");
+        model.addAttribute("size", size);
         model.addAttribute("orders", orders);
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", responseBody.getTotalPages());
         model.addAttribute("activePage", "orders");
+
         return "admin/admin-order";
     }
 
 
-    @PostMapping("/order/update/{orderId}/{status}")
-    public String updateOrderStatus(@PathVariable String status, @PathVariable Short orderId) {
-
+    @PostMapping("/order/status/{orderId}/{status}")
+    public String updateOrderStatus(
+            @PathVariable String status,
+            @PathVariable Short orderId
+    ) {
         String fullUrl = urlOrder + "/status";
-        // TODO: call order-service
-        ResponseEntity<ObjectResponse<UserResponse>> response = restTemplate.exchange(
+        UpdateStatusOrderRequest request = UpdateStatusOrderRequest.builder()
+                .orderId(orderId)
+                .status(status)
+                .build();
+        HttpEntity<UpdateStatusOrderRequest> requestEntity = new HttpEntity<>(request);
+        restTemplate.exchange(
                 fullUrl,
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<ObjectResponse<UserResponse>>() {}
+                HttpMethod.POST,
+                requestEntity,
+                Void.class
         );
 
-        return "redirect:/admin/orders";
+        return "redirect:/admin/order/home";
     }
 
 }

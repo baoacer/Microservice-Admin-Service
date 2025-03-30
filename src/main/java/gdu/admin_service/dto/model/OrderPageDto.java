@@ -8,7 +8,8 @@ import java.util.List;
 @Data
 public class OrderPageDto {
     private List<GetAllOrderOutputDTO> content;
-    private int number;         // Trang hiện tại
-    private int size;           // Kích thước trang
+    private int number;
+    private int size;
     private long totalElements;
+    private long totalPages;
 }

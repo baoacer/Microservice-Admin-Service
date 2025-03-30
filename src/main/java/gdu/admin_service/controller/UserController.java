@@ -34,7 +34,7 @@ public class UserController {
 
     @GetMapping("/user/home")
     public String getAllUsers(
-            @RequestParam(defaultValue = "20") byte size,
+            @RequestParam(defaultValue = "5") byte size,
             @RequestParam(defaultValue = "0") byte page,
             Model model
     ) {
@@ -49,9 +49,13 @@ public class UserController {
         ObjectResponse<UserResponse> responseBody = response.getBody();
 
         if (responseBody != null) {
-            List<UserResponse> users = responseBody.getContent();
-            model.addAttribute("users", users);
+            model.addAttribute("activePage", "products");
+            model.addAttribute("size", size);
+            model.addAttribute("users", responseBody.getContent());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", responseBody.getTotalPages());
         }
+
         model.addAttribute("activePage", "users");
 
         return "admin/admin-user";

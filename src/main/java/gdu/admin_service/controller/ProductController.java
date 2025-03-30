@@ -49,7 +49,7 @@ public class ProductController {
 
     @GetMapping("/product/home")
     public String getAllProducts(
-            @RequestParam(defaultValue = "20") byte size,
+            @RequestParam(defaultValue = "5") byte size,
             @RequestParam(defaultValue = "0") byte page,
             Model model
     ) {
@@ -64,10 +64,12 @@ public class ProductController {
         ObjectResponse<ProductDto> responseBody = response.getBody();
 
         if (responseBody != null) {
-            List<ProductDto> products = responseBody.getContent();
-            model.addAttribute("products", products);
+            model.addAttribute("activePage", "products");
+            model.addAttribute("size", size);
+            model.addAttribute("products", responseBody.getContent());
+            model.addAttribute("currentPage", page);
+            model.addAttribute("totalPages", responseBody.getTotalPages());
         }
-        model.addAttribute("activePage", "products");
 
         return "admin/admin-product";
     }
