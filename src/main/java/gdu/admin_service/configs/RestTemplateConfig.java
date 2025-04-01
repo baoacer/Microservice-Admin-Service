@@ -1,4 +1,4 @@
-package gdu.admin_service.security;
+package gdu.admin_service.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
